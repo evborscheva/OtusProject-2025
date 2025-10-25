@@ -1,5 +1,5 @@
 {
-  "name": "projectOtus",
+  "name": "project-otus",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -17,15 +17,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/evborscheva/otus-qa-js-2025-e.v.borscheva.git"
+    "url": "git+https://github.com/evborscheva/OtusProject-2025.git"
   },
   "keywords": [],
   "author": "evborscheva",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/evborscheva/otus-qa-js-2025-e.v.borscheva/issues"
+    "url": "https://github.com/evborscheva/OtusProject-2025/issues"
   },
-  "homepage": "https://github.com/evborscheva/otus-qa-js-2025-e.v.borscheva#readme",
+  "homepage": "https://github.com/evborscheva/OtusProject-2025#readme",
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@babel/plugin-transform-modules-commonjs": "^7.27.1",

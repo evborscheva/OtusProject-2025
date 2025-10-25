@@ -1,0 +1,28 @@
+# Папки
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+coverage/
+.vscode/
+.idea/
+
+# Файлы
+*.log
+*.lock
+*.md          
+package.json
+package-lock.json
+tsconfig.json
+.env*
+
+# Бинарники
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.svg
+*.pdf
+*.ttf
