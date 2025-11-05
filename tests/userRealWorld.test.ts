@@ -24,14 +24,13 @@ describe('RealWorld - выполнение методов без авториз�
   });
 });
 
-describe('RealWorld - users', () => {
+describe('RealWorld - проверки изменения пользователя и получения данных о пользователе', () => {
   let newUser: any;
-  let newUser_1: any;
   let token: string;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     newUser = UserFixture.generateUserCredentials();
-    const responseRegisterUser = await AuthService.registerUser(newUser.email, newUser.password, newUser.username);
+    const responseRegisterUser = await AuthService.registerUser(newUser);
     token = responseRegisterUser.data.user.token;
   });
 
@@ -51,10 +50,10 @@ describe('RealWorld - users', () => {
   });
 
   test('Обновление текущего пользователя - указанный в запросе email есть у ранее созданного пользователя', async () => {
-    newUser_1 = UserFixture.generateUserCredentials();
+    const newUser_1 = UserFixture.generateUserCredentials();
 
     const params = {
-      password: '123QWEasdzxc!!!!',
+      password: newUser_1.password,
       email: config.email,
       bio: 'I like to do my homework',
       username: newUser_1.username,
@@ -71,8 +70,9 @@ describe('RealWorld - users', () => {
   });
 
   test('Обновление текущего пользователя - указанный в запросе username есть у ранее созданного пользователя', async () => {
+    const newUser_1 = UserFixture.generateUserCredentials();
     const params = {
-      password: '123QWEasdzxc!!!!',
+      password: newUser_1.password,
       email: newUser_1.email,
       bio: 'I like to do my homework',
       username: config.username,
@@ -89,8 +89,9 @@ describe('RealWorld - users', () => {
   });
 
   test('Обновление текущего пользователя - указанных в запросе  email и username нет у ранее созданных пользователей', async () => {
+    const newUser_1 = UserFixture.generateUserCredentials();
     const params = {
-      password: '123QWEasdzxc!!!!',
+      password: newUser_1.password,
       email: newUser_1.email,
       bio: 'I like to do my homework',
       username: newUser_1.username,
@@ -119,6 +120,124 @@ describe('RealWorld - users', () => {
         bio: 'I like to do my homework',
         image: 'https://share.google/images/bqhrXQUgaAp9yoFrH'
       }
+    });
+  });
+});
+
+describe('RealWorld - при обновлении передано пустое значение поля password/email/username', () => {
+  const newUser = UserFixture.generateUserCredentials();
+  const newUser_1 = UserFixture.generateUserCredentials();
+  let token: string;
+
+  beforeAll(async () => {
+    const responseRegisterUser = await AuthService.registerUser(newUser);
+    token = responseRegisterUser.data.user.token;
+  });
+
+  const params: { name: string; param: string; user: any }[] = [
+    {
+      name: 'Обновление пользователя - пустое значение поля password',
+      param: 'password',
+      user: {
+        password: '',
+        email: newUser_1.email,
+        bio: 'I like to do my homework',
+        username: newUser_1.username,
+        image: 'https://share.google/images/bqhrXQUgaAp9yoFrH'
+      }
+    },
+    {
+      name: 'Обновление пользователя - пустое значение поля email',
+      param: 'email',
+      user: {
+        password: newUser_1.password,
+        email: '',
+        bio: 'I like to do my homework',
+        username: newUser_1.username,
+        image: 'https://share.google/images/bqhrXQUgaAp9yoFrH'
+      }
+    },
+    {
+      name: 'Обновление пользователя - пустое значение поля username',
+      param: 'username',
+      user: {
+        password: newUser_1.password,
+        email: newUser_1.email,
+        bio: 'I like to do my homework',
+        username: '',
+        image: 'https://share.google/images/bqhrXQUgaAp9yoFrH'
+      }
+    }
+  ];
+  test.each(params)('$name', async ({ user, param }) => {
+    const response = await UserService.updateUser(user, token);
+
+    expect(response.status).toBe(422);
+    expect(response.data).toMatchObject({
+      errors: {
+        [param]: ["can't be empty"]
+      }
+    });
+  });
+
+  describe('RealWorld - при обновлении передано пустое значение поля bio/image', () => {
+    let newUser: any;
+    let token: string;
+
+    beforeEach(async () => {
+      newUser = UserFixture.generateUserCredentials();
+      const responseRegisterUser = await AuthService.registerUser(newUser);
+      token = responseRegisterUser.data.user.token;
+      const params = {
+        bio: 'I like to do my homework',
+        image: 'https://share.google/images/bqhrXQUgaAp9yoFrH'
+      };
+      const response = await UserService.updateUser(params, token);
+
+      expect(response.data).toMatchObject({
+        user: {
+          email: newUser.email,
+          token: expect.any(String),
+          username: newUser.username,
+          bio: 'I like to do my homework',
+          image: 'https://share.google/images/bqhrXQUgaAp9yoFrH'
+        }
+      });
+    });
+
+    test('Обновление пользователя - пустое значение поля bio', async () => {
+      const params = {
+        bio: ''
+      };
+      const response = await UserService.updateUser(params, token);
+
+      expect(response.status).toBe(200);
+      expect(response.data).toMatchObject({
+        user: {
+          email: newUser.email,
+          token: expect.any(String),
+          username: newUser.username,
+          bio: '',
+          image: null
+        }
+      });
+    });
+    test('Обновление пользователя - пустое значение поля image', async () => {
+      const params = {
+        image: ''
+      };
+      const response = await UserService.updateUser(params, token);
+
+      expect(response.status).toBe(200);
+      expect(response.data).toMatchObject({
+        user: {
+          email: newUser.email,
+          token: expect.any(String),
+          username: newUser.username,
+          bio: 'I like to do my homework',
+          image: ''
+        }
+      });
     });
   });
 });

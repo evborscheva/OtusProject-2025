@@ -1,15 +1,11 @@
 import client from './client';
 
 const getUser = async (token?: string) => {
-
-  const response = await client.get(
-    '/api/user',
-    {
+  const response = await client.get('/api/user', {
     headers: {
       Authorization: `Bearer ${token}`
     }
-  }
-);
+  });
 
   return {
     headers: response.headers,
@@ -30,16 +26,11 @@ const updateUser = async (params: UpdateUserParams, token?: string) => {
   const payload = {
     user: params
   };
-  const response = await client.put(
-    '/api/user',
-    payload,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+  const response = await client.put('/api/user', payload, {
+    headers: {
+      Authorization: `Bearer ${token}`
     }
-);
-
+  });
 
   return {
     headers: response.headers,
@@ -48,9 +39,7 @@ const updateUser = async (params: UpdateUserParams, token?: string) => {
   };
 };
 
-
-
 export default {
-getUser,
-updateUser
+  getUser,
+  updateUser
 };
