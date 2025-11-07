@@ -2,6 +2,7 @@ import { AuthService } from '../framework/services';
 import { UserService } from '../framework/services';
 import { UserFixture } from '../framework/fixtures';
 import config from '../framework/config/configRealWorld';
+import DatabaseService from '../framework/services/DatabaseService';
 
 describe('RealWorld - выполнение методов без авторизации', () => {
   test('Получение текущего пользователя - пользователь не авторизован', async () => {
@@ -32,6 +33,14 @@ describe('RealWorld - проверки изменения пользовател
     newUser = UserFixture.generateUserCredentials();
     const responseRegisterUser = await AuthService.registerUser(newUser);
     token = responseRegisterUser.data.user.token;
+  });
+
+  beforeAll(async () => {
+    await DatabaseService.connect();
+  });
+
+  afterAll(async () => {
+    await DatabaseService.disconnect();
   });
 
   test('Получение данных текущего пользователя', async () => {
@@ -110,17 +119,12 @@ describe('RealWorld - проверки изменения пользовател
       }
     });
 
-    const getResponse = await UserService.getUser(token);
-    expect(getResponse.status).toBe(200);
-    expect(getResponse.data).toMatchObject({
-      user: {
-        email: newUser_1.email,
-        token: expect.any(String),
-        username: newUser_1.username,
-        bio: 'I like to do my homework',
-        image: 'https://share.google/images/bqhrXQUgaAp9yoFrH'
-      }
-    });
+    const dbUser = await DatabaseService.findUser(newUser_1.username);
+    expect(dbUser).toBeDefined();
+    expect(dbUser.email).toBe(newUser_1.email);
+    expect(dbUser.bio).toBe('I like to do my homework');
+    expect(dbUser.password).toBe(newUser_1.password);
+    expect(dbUser.image).toBe('https://share.google/images/bqhrXQUgaAp9yoFrH');
   });
 });
 
@@ -221,6 +225,12 @@ describe('RealWorld - при обновлении передано пустое 
           image: null
         }
       });
+
+      const dbUser = await DatabaseService.findUser(newUser.username);
+      expect(dbUser.email).toBe(newUser.email);
+      expect(dbUser.bio).toBe('');
+      expect(dbUser.password).toBe(newUser.password);
+      expect(dbUser.image).toBeNull();
     });
     test('Обновление пользователя - пустое значение поля image', async () => {
       const params = {
@@ -238,6 +248,11 @@ describe('RealWorld - при обновлении передано пустое 
           image: ''
         }
       });
+      const dbUser = await DatabaseService.findUser(newUser.username);
+      expect(dbUser.email).toBe(newUser.email);
+      expect(dbUser.bio).toBe('I like to do my homework');
+      expect(dbUser.password).toBe(newUser.password);
+      expect(dbUser.image).toBe('');
     });
   });
 });

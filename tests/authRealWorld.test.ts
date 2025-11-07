@@ -1,10 +1,19 @@
 import { AuthService } from '../framework/services';
 import { UserFixture } from '../framework/fixtures';
+import DatabaseService from '../framework/services/DatabaseService';
 
 describe('RealWorld - проверки регистрации и авторизации пользователя', () => {
+  beforeAll(async () => {
+    await DatabaseService.connect();
+  });
+
+  afterAll(async () => {
+    await DatabaseService.disconnect();
+  });
+
   test('Регистрация нового пользователя - указанных имени и email нет у имеющихся пользователей', async () => {
     const newUser = UserFixture.generateUserCredentials();
-    console.log(newUser);
+    // console.log(newUser);
     const response = await AuthService.registerUser(newUser);
 
     expect(response.status).toBe(201);
@@ -17,6 +26,11 @@ describe('RealWorld - проверки регистрации и авториз�
         image: null
       }
     });
+
+    const dbUser = await DatabaseService.findUser(newUser.username);
+    expect(dbUser).toBeDefined();
+    expect(dbUser.email).toBe(newUser.email);
+    expect(dbUser.password).toBe(newUser.password);
   });
 
   test('Регистрация нового пользователя - указанное имя есть у другого пользователя', async () => {

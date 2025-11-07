@@ -1,6 +1,7 @@
 import { AuthService } from '../framework/services';
 import { UserFixture } from '../framework/fixtures';
 import { ArticleService } from '../framework/services';
+import DatabaseService from '../framework/services/DatabaseService';
 import { faker } from '@faker-js/faker';
 
 describe('RealWorld - создание новой статьи', () => {
@@ -11,6 +12,12 @@ describe('RealWorld - создание новой статьи', () => {
     newUser = UserFixture.generateUserCredentials();
     const responseRegisterUser = await AuthService.registerUser(newUser);
     token = responseRegisterUser.data.user.token;
+
+    await DatabaseService.connect();
+  });
+
+  afterAll(async () => {
+    await DatabaseService.disconnect();
   });
 
   test('Создание статьи - в теле запроса есть только заполненные обязательные поля', async () => {
@@ -41,6 +48,11 @@ describe('RealWorld - создание новой статьи', () => {
         }
       }
     });
+    const dbArticle = await DatabaseService.findArticle(response.data.article.slug);
+    expect(dbArticle).toBeDefined();
+    expect(dbArticle.title).toBe(params.title);
+    expect(dbArticle.description).toBe(params.description);
+    expect(dbArticle.body).toBe(params.body);
   });
 
   test('Создание статьи -  в теле запроса заполнены все поля, указаны несколько существующих тегов', async () => {
