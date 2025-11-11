@@ -16,10 +16,6 @@ describe('RealWorld - создание новой статьи', () => {
     await DatabaseService.connect();
   });
 
-  afterAll(async () => {
-    await DatabaseService.disconnect();
-  });
-
   test('Создание статьи - в теле запроса есть только заполненные обязательные поля', async () => {
     const params = {
       title: 'Проверка методов создания статьи',

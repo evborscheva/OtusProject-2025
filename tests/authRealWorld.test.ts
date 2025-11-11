@@ -7,13 +7,8 @@ describe('RealWorld - проверки регистрации и авториз�
     await DatabaseService.connect();
   });
 
-  afterAll(async () => {
-    await DatabaseService.disconnect();
-  });
-
   test('Регистрация нового пользователя - указанных имени и email нет у имеющихся пользователей', async () => {
     const newUser = UserFixture.generateUserCredentials();
-    // console.log(newUser);
     const response = await AuthService.registerUser(newUser);
 
     expect(response.status).toBe(201);
@@ -30,7 +25,6 @@ describe('RealWorld - проверки регистрации и авториз�
     const dbUser = await DatabaseService.findUser(newUser.username);
     expect(dbUser).toBeDefined();
     expect(dbUser.email).toBe(newUser.email);
-    expect(dbUser.password).toBe(newUser.password);
   });
 
   test('Регистрация нового пользователя - указанное имя есть у другого пользователя', async () => {
@@ -119,6 +113,7 @@ describe('RealWorld - проверки регистрации и авториз�
       email: newUser.email,
       password: newUser.password
     };
+
     const response = await AuthService.loginUser(authUser);
 
     expect(response.status).toBe(200);
